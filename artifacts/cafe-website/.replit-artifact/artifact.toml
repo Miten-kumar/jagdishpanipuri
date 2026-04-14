@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Cafe & Restaurant Website"
+version = "1.0.0"
+id = "artifacts/cafe-website"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 18881
+
+[services.development]
+run = "pnpm --filter @workspace/cafe-website run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/cafe-website", "run", "build" ]
+publicDir = "artifacts/cafe-website/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "18881"
+BASE_PATH = "/"

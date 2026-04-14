@@ -2,7 +2,7 @@
 
 ## Overview
 
-pnpm workspace monorepo using TypeScript. Each package manages its own dependencies.
+pnpm workspace monorepo using TypeScript. Contains a full-stack restaurant/cafe website with public pages and an admin panel.
 
 ## Stack
 
@@ -15,6 +15,47 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - **Validation**: Zod (`zod/v4`), `drizzle-zod`
 - **API codegen**: Orval (from OpenAPI spec)
 - **Build**: esbuild (CJS bundle)
+- **Frontend**: React + Vite, Tailwind CSS, shadcn/ui, Framer Motion, Wouter
+
+## Artifacts
+
+### Cafe Website (`artifacts/cafe-website`)
+Full-stack restaurant/cafe website at preview path `/`.
+
+**Public Pages:**
+- `/` — Landing page with hero, featured menu, about preview, gallery preview, categories
+- `/about` — About us with story, values, team, and timeline
+- `/menu` — Categorized menu with search/filter and food photos
+- `/gallery` — Photo gallery with lightbox/zoom
+- `/contact` — Inquiry form with contact info
+
+**Admin Panel:**
+- `/admin` — Dashboard with stats (menu items, gallery images, inquiries)
+- `/admin/content` — Edit all site content (hero, about, contact info, social links)
+- `/admin/theme` — Color picker for primary/secondary/accent colors + font family (applied live)
+- `/admin/menu` — Add/edit/delete menu categories and items
+- `/admin/gallery` — Add/edit/delete gallery images
+- `/admin/inquiries` — View and delete customer inquiries
+
+### API Server (`artifacts/api-server`)
+Express API at preview path `/api`.
+
+**Routes:**
+- `/api/site-content` — GET/PUT site content
+- `/api/theme` — GET/PUT theme settings
+- `/api/menu-categories` — CRUD menu categories
+- `/api/menu-items` — CRUD menu items (filterable by categoryId)
+- `/api/gallery-images` — CRUD gallery images
+- `/api/inquiries` — GET/POST/DELETE inquiries
+
+## DB Schema
+
+- `site_content` — Single row with all site text/images/contact info
+- `theme_settings` — Single row with primary/secondary/accent colors and font
+- `menu_categories` — Menu category names, descriptions, icons
+- `menu_items` — Individual items with price, image, tags, available/featured flags
+- `gallery_images` — Gallery photo URLs with captions and alt text
+- `inquiries` — Customer messages from the contact form
 
 ## Key Commands
 

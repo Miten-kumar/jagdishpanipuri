@@ -3,20 +3,29 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: API specification for Cafe & Restaurant Website
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: site-content
+    description: Site content management
+  - name: menu
+    description: Menu management
+  - name: gallery
+    description: Gallery management
+  - name: inquiries
+    description: Customer inquiries
+  - name: theme
+    description: Theme settings
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +33,329 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /site-content:
+    get:
+      operationId: getSiteContent
+      tags: [site-content]
+      summary: Get all site content
+      responses:
+        "200":
+          description: Site content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SiteContent"
+    put:
+      operationId: updateSiteContent
+      tags: [site-content]
+      summary: Update site content
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateSiteContentBody"
+      responses:
+        "200":
+          description: Updated site content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SiteContent"
+
+  /theme:
+    get:
+      operationId: getTheme
+      tags: [theme]
+      summary: Get current theme settings
+      responses:
+        "200":
+          description: Theme settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ThemeSettings"
+    put:
+      operationId: updateTheme
+      tags: [theme]
+      summary: Update theme settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateThemeBody"
+      responses:
+        "200":
+          description: Updated theme
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ThemeSettings"
+
+  /menu-categories:
+    get:
+      operationId: getMenuCategories
+      tags: [menu]
+      summary: Get all menu categories
+      responses:
+        "200":
+          description: List of menu categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MenuCategory"
+    post:
+      operationId: createMenuCategory
+      tags: [menu]
+      summary: Create a menu category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMenuCategoryBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MenuCategory"
+
+  /menu-categories/{id}:
+    put:
+      operationId: updateMenuCategory
+      tags: [menu]
+      summary: Update a menu category
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMenuCategoryBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MenuCategory"
+    delete:
+      operationId: deleteMenuCategory
+      tags: [menu]
+      summary: Delete a menu category
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /menu-items:
+    get:
+      operationId: getMenuItems
+      tags: [menu]
+      summary: Get all menu items
+      parameters:
+        - name: categoryId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of menu items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MenuItem"
+    post:
+      operationId: createMenuItem
+      tags: [menu]
+      summary: Create a menu item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMenuItemBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MenuItem"
+
+  /menu-items/{id}:
+    put:
+      operationId: updateMenuItem
+      tags: [menu]
+      summary: Update a menu item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMenuItemBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MenuItem"
+    delete:
+      operationId: deleteMenuItem
+      tags: [menu]
+      summary: Delete a menu item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /gallery-images:
+    get:
+      operationId: getGalleryImages
+      tags: [gallery]
+      summary: Get all gallery images
+      responses:
+        "200":
+          description: List of gallery images
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GalleryImage"
+    post:
+      operationId: createGalleryImage
+      tags: [gallery]
+      summary: Add a gallery image
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateGalleryImageBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GalleryImage"
+
+  /gallery-images/{id}:
+    put:
+      operationId: updateGalleryImage
+      tags: [gallery]
+      summary: Update a gallery image
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateGalleryImageBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GalleryImage"
+    delete:
+      operationId: deleteGalleryImage
+      tags: [gallery]
+      summary: Delete a gallery image
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /inquiries:
+    get:
+      operationId: getInquiries
+      tags: [inquiries]
+      summary: Get all inquiries (admin)
+      responses:
+        "200":
+          description: List of inquiries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Inquiry"
+    post:
+      operationId: createInquiry
+      tags: [inquiries]
+      summary: Submit a customer inquiry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateInquiryBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Inquiry"
+
+  /inquiries/{id}:
+    delete:
+      operationId: deleteInquiry
+      tags: [inquiries]
+      summary: Delete an inquiry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +366,325 @@ components:
       required:
         - status
 
+    SiteContent:
+      type: object
+      properties:
+        id:
+          type: integer
+        heroTitle:
+          type: string
+        heroSubtitle:
+          type: string
+        heroImageUrl:
+          type: string
+        aboutTitle:
+          type: string
+        aboutText:
+          type: string
+        aboutImageUrl:
+          type: string
+        restaurantName:
+          type: string
+        restaurantTagline:
+          type: string
+        logoUrl:
+          type: string
+        address:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        openingHours:
+          type: string
+        facebookUrl:
+          type: string
+        instagramUrl:
+          type: string
+        twitterUrl:
+          type: string
+        footerText:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - heroTitle
+        - heroSubtitle
+        - heroImageUrl
+        - aboutTitle
+        - aboutText
+        - aboutImageUrl
+        - restaurantName
+        - restaurantTagline
+        - logoUrl
+        - address
+        - phone
+        - email
+        - openingHours
+        - footerText
+        - updatedAt
+
+    UpdateSiteContentBody:
+      type: object
+      properties:
+        heroTitle:
+          type: string
+        heroSubtitle:
+          type: string
+        heroImageUrl:
+          type: string
+        aboutTitle:
+          type: string
+        aboutText:
+          type: string
+        aboutImageUrl:
+          type: string
+        restaurantName:
+          type: string
+        restaurantTagline:
+          type: string
+        logoUrl:
+          type: string
+        address:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        openingHours:
+          type: string
+        facebookUrl:
+          type: string
+        instagramUrl:
+          type: string
+        twitterUrl:
+          type: string
+        footerText:
+          type: string
+
+    ThemeSettings:
+      type: object
+      properties:
+        id:
+          type: integer
+        primaryColor:
+          type: string
+        secondaryColor:
+          type: string
+        accentColor:
+          type: string
+        fontFamily:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - primaryColor
+        - secondaryColor
+        - accentColor
+        - fontFamily
+        - updatedAt
+
+    UpdateThemeBody:
+      type: object
+      properties:
+        primaryColor:
+          type: string
+        secondaryColor:
+          type: string
+        accentColor:
+          type: string
+        fontFamily:
+          type: string
+
+    MenuCategory:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        iconName:
+          type: string
+        sortOrder:
+          type: integer
+        createdAt:
+          type: string
+      required:
+        - id
+        - name
+        - description
+        - iconName
+        - sortOrder
+        - createdAt
+
+    CreateMenuCategoryBody:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        iconName:
+          type: string
+        sortOrder:
+          type: integer
+      required:
+        - name
+        - description
+        - iconName
+
+    MenuItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        categoryId:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: string
+        imageUrl:
+          type: string
+        isAvailable:
+          type: boolean
+        isFeatured:
+          type: boolean
+        tags:
+          type: string
+        sortOrder:
+          type: integer
+        createdAt:
+          type: string
+      required:
+        - id
+        - categoryId
+        - name
+        - description
+        - price
+        - imageUrl
+        - isAvailable
+        - isFeatured
+        - tags
+        - sortOrder
+        - createdAt
+
+    CreateMenuItemBody:
+      type: object
+      properties:
+        categoryId:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: string
+        imageUrl:
+          type: string
+        isAvailable:
+          type: boolean
+        isFeatured:
+          type: boolean
+        tags:
+          type: string
+        sortOrder:
+          type: integer
+      required:
+        - categoryId
+        - name
+        - description
+        - price
+        - imageUrl
+
+    GalleryImage:
+      type: object
+      properties:
+        id:
+          type: integer
+        imageUrl:
+          type: string
+        caption:
+          type: string
+        altText:
+          type: string
+        sortOrder:
+          type: integer
+        createdAt:
+          type: string
+      required:
+        - id
+        - imageUrl
+        - caption
+        - altText
+        - sortOrder
+        - createdAt
+
+    CreateGalleryImageBody:
+      type: object
+      properties:
+        imageUrl:
+          type: string
+        caption:
+          type: string
+        altText:
+          type: string
+        sortOrder:
+          type: integer
+      required:
+        - imageUrl
+        - caption
+        - altText
+
+    Inquiry:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        subject:
+          type: string
+        message:
+          type: string
+        isRead:
+          type: boolean
+        createdAt:
+          type: string
+      required:
+        - id
+        - name
+        - email
+        - subject
+        - message
+        - isRead
+        - createdAt
+
+    CreateInquiryBody:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        subject:
+          type: string
+        message:
+          type: string
+      required:
+        - name
+        - email
+        - subject
+        - message
