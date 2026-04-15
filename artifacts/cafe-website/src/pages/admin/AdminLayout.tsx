@@ -1,20 +1,26 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, FileText, Palette, UtensilsCrossed, Image, MessageSquare, ChevronRight, LogOut, Menu, X } from "lucide-react";
+import { LayoutDashboard, FileText, Palette, UtensilsCrossed, Image, MessageSquare, ChevronRight, LogOut, Menu, X, ShoppingBag, BarChart2, Users, MapPin } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/context/AuthContext";
 
 const navItems = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+  { label: "Customer Orders", href: "/admin/orders", icon: ShoppingBag },
   { label: "Site Content", href: "/admin/content", icon: FileText },
+  { label: "Branch Locations", href: "/admin/branches", icon: MapPin },
   { label: "Theme Color", href: "/admin/theme", icon: Palette },
   { label: "Menu Manager", href: "/admin/menu", icon: UtensilsCrossed },
   { label: "Gallery", href: "/admin/gallery", icon: Image },
   { label: "Inquiries", href: "/admin/inquiries", icon: MessageSquare },
+  { label: "Analytics", href: "/admin/analytics", icon: BarChart2 },
+  { label: "Manage Users", href: "/admin/users", icon: Users },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { logout, user } = useAuth();
 
   return (
     <div className="min-h-screen bg-muted/20 flex">
@@ -54,13 +60,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             );
           })}
         </nav>
-        <div className="p-3 border-t border-border">
+        <div className="p-3 border-t border-border space-y-1.5">
+          {user && <p className="text-xs text-muted-foreground px-3 truncate">{user.username}</p>}
           <Link href="/" data-testid="admin-link-site">
             <Button variant="outline" size="sm" className="w-full justify-start gap-2">
               <LogOut className="w-4 h-4" />
               View Public Site
             </Button>
           </Link>
+          <Button variant="ghost" size="sm" className="w-full justify-start gap-2 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={logout}>
+            <LogOut className="w-4 h-4" />
+            Sign Out
+          </Button>
         </div>
       </aside>
 

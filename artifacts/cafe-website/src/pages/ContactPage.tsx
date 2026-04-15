@@ -11,6 +11,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
+
+const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+interface Branch { id: number; name: string; address: string; phone: string; email: string; openingHours: string; mapUrl: string; }
 
 const inquirySchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -27,6 +31,7 @@ export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
   const { toast } = useToast();
   const createInquiry = useCreateInquiry();
+  const { data: branches } = useQuery<Branch[]>({ queryKey: ["branches"], queryFn: async () => { const r = await fetch(`${BASE}/api/branches`); return r.json(); } });
 
   const form = useForm<InquiryForm>({
     resolver: zodResolver(inquirySchema),
@@ -195,6 +200,38 @@ export default function ContactPage() {
           </div>
         </div>
       </section>
+
+      {/* Branch Locations */}
+      {branches && branches.length > 0 && (
+        <section className="py-12 bg-muted/30">
+          <div className="max-w-7xl mx-auto px-4">
+            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mb-8 text-center">
+              <Badge variant="secondary" className="mb-3">Our Locations</Badge>
+              <h2 className="text-3xl font-bold text-foreground">Visit Any Branch</h2>
+            </motion.div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {branches.map((branch, i) => (
+                <motion.div key={branch.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07 }} viewport={{ once: true }}
+                  className="bg-card border border-border rounded-2xl p-5 hover:shadow-md transition-shadow">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-9 h-9 bg-primary/10 rounded-lg flex items-center justify-center shrink-0">
+                      <MapPin className="w-4 h-4 text-primary" />
+                    </div>
+                    <h3 className="font-bold text-foreground">{branch.name}</h3>
+                  </div>
+                  <div className="space-y-1.5 text-sm">
+                    {branch.address && <div className="flex gap-2 text-muted-foreground"><MapPin className="w-3.5 h-3.5 shrink-0 mt-0.5" /><span>{branch.address}</span></div>}
+                    {branch.phone && <div className="flex gap-2 text-muted-foreground"><Phone className="w-3.5 h-3.5 shrink-0" /><a href={`tel:${branch.phone}`} className="hover:text-primary transition-colors">{branch.phone}</a></div>}
+                    {branch.email && <div className="flex gap-2 text-muted-foreground"><Mail className="w-3.5 h-3.5 shrink-0" /><a href={`mailto:${branch.email}`} className="hover:text-primary transition-colors">{branch.email}</a></div>}
+                    {branch.openingHours && <div className="flex gap-2 text-muted-foreground"><Clock className="w-3.5 h-3.5 shrink-0" /><span>{branch.openingHours}</span></div>}
+                    {branch.mapUrl && <a href={branch.mapUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-primary text-xs hover:underline mt-1"><MapPin className="w-3 h-3" />View on Maps</a>}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
     </div>
   );
 }
