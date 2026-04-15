@@ -16,10 +16,15 @@ import { useQuery } from "@tanstack/react-query";
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 interface Branch { id: number; name: string; address: string; phone: string; email: string; openingHours: string; mapUrl: string; }
 
+const phoneRegex = /^(\+91[\s-]?)?[6-9]\d{9}$/;
+
 const inquirySchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email address"),
-  phone: z.string().optional(),
+  phone: z.string().optional().refine(
+    (v) => !v || v === "+91" || phoneRegex.test(v.replace(/[\s-]/g, "")),
+    "Please enter a valid phone number (e.g. +91 98765 43210)"
+  ),
   subject: z.string().min(3, "Subject must be at least 3 characters"),
   message: z.string().min(10, "Message must be at least 10 characters"),
 });
@@ -35,14 +40,15 @@ export default function ContactPage() {
 
   const form = useForm<InquiryForm>({
     resolver: zodResolver(inquirySchema),
-    defaultValues: { name: "", email: "", phone: "", subject: "", message: "" },
+    defaultValues: { name: "", email: "", phone: "+91", subject: "", message: "" },
   });
 
   const onSubmit = (data: InquiryForm) => {
-    createInquiry.mutate({ data: { name: data.name, email: data.email, phone: data.phone ?? "", subject: data.subject, message: data.message } }, {
+    const phone = data.phone === "+91" ? "" : (data.phone ?? "");
+    createInquiry.mutate({ data: { name: data.name, email: data.email, phone, subject: data.subject, message: data.message } }, {
       onSuccess: () => {
         setSubmitted(true);
-        form.reset();
+        form.reset({ name: "", email: "", phone: "+91", subject: "", message: "" });
       },
       onError: () => {
         toast({ title: "Error", description: "Failed to send message. Please try again.", variant: "destructive" });
@@ -51,9 +57,10 @@ export default function ContactPage() {
   };
 
   const address = siteContent?.address ?? "123 Main Street, Downtown, NY 10001";
-  const phone = siteContent?.phone ?? "+1 (555) 123-4567";
+  const phone = siteContent?.phone ?? "+91 98765 43210";
   const email = siteContent?.email ?? "hello@urbanbites.com";
   const openingHours = siteContent?.openingHours ?? "Mon-Sun: 8:00 AM - 10:00 PM";
+  const mapEmbedUrl = siteContent?.mapEmbedUrl ?? "";
 
   return (
     <div className="min-h-screen pt-16">
@@ -104,13 +111,28 @@ export default function ContactPage() {
                 ))}
               </div>
 
-              {/* Map placeholder */}
-              <div className="mt-8 rounded-2xl bg-muted/50 border border-border h-52 flex items-center justify-center">
-                <div className="text-center text-muted-foreground">
-                  <MapPin className="w-8 h-8 mx-auto mb-2 opacity-40" />
-                  <p className="text-sm">Map View</p>
-                  <p className="text-xs mt-1">{address}</p>
-                </div>
+              {/* Map View */}
+              <div className="mt-8 rounded-2xl overflow-hidden border border-border h-52">
+                {mapEmbedUrl ? (
+                  <iframe
+                    src={mapEmbedUrl}
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    title="Location Map"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-muted/50 flex items-center justify-center text-center text-muted-foreground">
+                    <div>
+                      <MapPin className="w-8 h-8 mx-auto mb-2 opacity-40" />
+                      <p className="text-sm">Map View</p>
+                      <p className="text-xs mt-1">Add a Google Maps embed URL in admin settings</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </motion.div>
 
@@ -164,7 +186,7 @@ export default function ContactPage() {
                             <FormItem>
                               <FormLabel>Phone (Optional)</FormLabel>
                               <FormControl>
-                                <Input placeholder="+1 (555) 000-0000" {...field} data-testid="input-phone" />
+                                <Input placeholder="+91 98765 43210" {...field} data-testid="input-phone" />
                               </FormControl>
                               <FormMessage />
                             </FormItem>

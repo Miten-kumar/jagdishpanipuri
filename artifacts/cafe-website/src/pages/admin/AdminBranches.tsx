@@ -18,7 +18,8 @@ function BranchFormModal({ branch, onClose, onSaved }: { branch?: Branch | null;
   const { token } = useAuth();
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ name: branch?.name ?? "", address: branch?.address ?? "", phone: branch?.phone ?? "", email: branch?.email ?? "", openingHours: branch?.openingHours ?? "", mapUrl: branch?.mapUrl ?? "", sortOrder: branch?.sortOrder ?? 0 });
+  const [form, setForm] = useState({ name: branch?.name ?? "", address: branch?.address ?? "", phone: branch?.phone ?? "+91", email: branch?.email ?? "", openingHours: branch?.openingHours ?? "", mapUrl: branch?.mapUrl ?? "", sortOrder: branch?.sortOrder ?? 0 });
+  const [phoneError, setPhoneError] = useState("");
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();

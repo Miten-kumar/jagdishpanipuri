@@ -14,7 +14,7 @@ export default function AdminInquiries() {
 
   const handleDelete = (id: number) => {
     if (!confirm("Delete this inquiry?")) return;
-    deleteInquiry.mutate({ params: { id } }, {
+    deleteInquiry.mutate({ id }, {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getGetInquiriesQueryKey() });
         toast({ title: "Inquiry deleted" });

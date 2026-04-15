@@ -405,6 +405,10 @@ components:
           type: string
         footerText:
           type: string
+        currency:
+          type: string
+        mapEmbedUrl:
+          type: string
         updatedAt:
           type: string
       required:
@@ -423,6 +427,8 @@ components:
         - email
         - openingHours
         - footerText
+        - currency
+        - mapEmbedUrl
         - updatedAt
 
     UpdateSiteContentBody:
@@ -461,6 +467,10 @@ components:
         twitterUrl:
           type: string
         footerText:
+          type: string
+        currency:
+          type: string
+        mapEmbedUrl:
           type: string
 
     ThemeSettings:

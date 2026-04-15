@@ -21,6 +21,8 @@ export const siteContentTable = pgTable("site_content", {
   instagramUrl: text("instagram_url").default(""),
   twitterUrl: text("twitter_url").default(""),
   footerText: text("footer_text").notNull().default("2024 Urban Bites. All rights reserved."),
+  currency: text("currency").notNull().default("INR"),
+  mapEmbedUrl: text("map_embed_url").notNull().default(""),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 

@@ -9,7 +9,18 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+
+const CURRENCIES = [
+  { code: "INR", symbol: "₹", name: "Indian Rupee (₹)" },
+  { code: "USD", symbol: "$", name: "US Dollar ($)" },
+  { code: "EUR", symbol: "€", name: "Euro (€)" },
+  { code: "GBP", symbol: "£", name: "British Pound (£)" },
+  { code: "AED", symbol: "د.إ", name: "UAE Dirham (د.إ)" },
+  { code: "SGD", symbol: "S$", name: "Singapore Dollar (S$)" },
+  { code: "AUD", symbol: "A$", name: "Australian Dollar (A$)" },
+];
 
 const contentSchema = z.object({
   restaurantName: z.string().min(1, "Required"),
@@ -25,6 +36,8 @@ const contentSchema = z.object({
   phone: z.string().min(1, "Required"),
   email: z.string().email("Invalid email"),
   openingHours: z.string().min(1, "Required"),
+  currency: z.string().min(1, "Required"),
+  mapEmbedUrl: z.string().optional(),
   facebookUrl: z.string().optional(),
   instagramUrl: z.string().optional(),
   twitterUrl: z.string().optional(),
@@ -46,6 +59,7 @@ export default function AdminContent() {
       heroTitle: "", heroSubtitle: "", heroImageUrl: "",
       aboutTitle: "", aboutText: "", aboutImageUrl: "",
       address: "", phone: "", email: "", openingHours: "",
+      currency: "INR", mapEmbedUrl: "",
       facebookUrl: "", instagramUrl: "", twitterUrl: "", footerText: "",
     },
   });
@@ -66,6 +80,8 @@ export default function AdminContent() {
         phone: siteContent.phone ?? "",
         email: siteContent.email ?? "",
         openingHours: siteContent.openingHours ?? "",
+        currency: siteContent.currency ?? "INR",
+        mapEmbedUrl: siteContent.mapEmbedUrl ?? "",
         facebookUrl: siteContent.facebookUrl ?? "",
         instagramUrl: siteContent.instagramUrl ?? "",
         twitterUrl: siteContent.twitterUrl ?? "",
@@ -88,58 +104,6 @@ export default function AdminContent() {
 
   if (isLoading) return <div className="text-muted-foreground">Loading...</div>;
 
-  const sections = [
-    {
-      title: "Brand Identity",
-      fields: [
-        { name: "restaurantName" as const, label: "Restaurant Name", placeholder: "Urban Bites" },
-        { name: "restaurantTagline" as const, label: "Tagline", placeholder: "Fresh. Bold. Delicious." },
-        { name: "logoUrl" as const, label: "Logo URL", placeholder: "https://example.com/logo.png" },
-      ],
-    },
-    {
-      title: "Hero Section",
-      fields: [
-        { name: "heroTitle" as const, label: "Hero Title", placeholder: "Welcome to Urban Bites" },
-        { name: "heroSubtitle" as const, label: "Hero Subtitle", placeholder: "Fresh flavors crafted with love..." },
-        { name: "heroImageUrl" as const, label: "Hero Background Image URL", placeholder: "https://example.com/hero.jpg" },
-      ],
-    },
-    {
-      title: "About Section",
-      fields: [
-        { name: "aboutTitle" as const, label: "About Title", placeholder: "Our Story" },
-        { name: "aboutImageUrl" as const, label: "About Image URL", placeholder: "https://example.com/about.jpg" },
-      ],
-      textareas: [
-        { name: "aboutText" as const, label: "About Text", placeholder: "Tell your story..." },
-      ],
-    },
-    {
-      title: "Contact Information",
-      fields: [
-        { name: "address" as const, label: "Address", placeholder: "123 Main Street, City, State" },
-        { name: "phone" as const, label: "Phone Number", placeholder: "+1 (555) 000-0000" },
-        { name: "email" as const, label: "Email", placeholder: "hello@restaurant.com" },
-        { name: "openingHours" as const, label: "Opening Hours", placeholder: "Mon-Sun: 8:00 AM - 10:00 PM" },
-      ],
-    },
-    {
-      title: "Social Media",
-      fields: [
-        { name: "facebookUrl" as const, label: "Facebook URL", placeholder: "https://facebook.com/..." },
-        { name: "instagramUrl" as const, label: "Instagram URL", placeholder: "https://instagram.com/..." },
-        { name: "twitterUrl" as const, label: "Twitter/X URL", placeholder: "https://twitter.com/..." },
-      ],
-    },
-    {
-      title: "Footer",
-      textareas: [
-        { name: "footerText" as const, label: "Footer Text", placeholder: "2024 Restaurant. All rights reserved." },
-      ],
-    },
-  ];
-
   return (
     <div>
       <div className="mb-6">
@@ -148,39 +112,172 @@ export default function AdminContent() {
       </div>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          {sections.map((section) => (
-            <Card key={section.title}>
-              <CardHeader className="pb-4">
-                <CardTitle className="text-base">{section.title}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {section.fields?.map((field) => (
-                    <FormField key={field.name} control={form.control} name={field.name} render={({ field: f }) => (
-                      <FormItem>
-                        <FormLabel>{field.label}</FormLabel>
-                        <FormControl>
-                          <Input placeholder={field.placeholder} {...f} data-testid={`input-${field.name}`} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
-                  ))}
-                </div>
-                {section.textareas?.map((field) => (
+
+          {/* Brand Identity */}
+          <Card>
+            <CardHeader className="pb-4"><CardTitle className="text-base">Brand Identity</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {[
+                  { name: "restaurantName" as const, label: "Restaurant Name", placeholder: "Urban Bites" },
+                  { name: "restaurantTagline" as const, label: "Tagline", placeholder: "Fresh. Bold. Delicious." },
+                  { name: "logoUrl" as const, label: "Logo URL", placeholder: "https://example.com/logo.png" },
+                ].map((field) => (
                   <FormField key={field.name} control={form.control} name={field.name} render={({ field: f }) => (
                     <FormItem>
                       <FormLabel>{field.label}</FormLabel>
-                      <FormControl>
-                        <Textarea placeholder={field.placeholder} rows={4} {...f} data-testid={`textarea-${field.name}`} />
-                      </FormControl>
+                      <FormControl><Input placeholder={field.placeholder} {...f} /></FormControl>
                       <FormMessage />
                     </FormItem>
                   )} />
                 ))}
-              </CardContent>
-            </Card>
-          ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Hero Section */}
+          <Card>
+            <CardHeader className="pb-4"><CardTitle className="text-base">Hero Section</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {[
+                  { name: "heroTitle" as const, label: "Hero Title", placeholder: "Welcome to Urban Bites" },
+                  { name: "heroSubtitle" as const, label: "Hero Subtitle", placeholder: "Fresh flavors crafted with love..." },
+                  { name: "heroImageUrl" as const, label: "Hero Background Image URL", placeholder: "https://example.com/hero.jpg" },
+                ].map((field) => (
+                  <FormField key={field.name} control={form.control} name={field.name} render={({ field: f }) => (
+                    <FormItem>
+                      <FormLabel>{field.label}</FormLabel>
+                      <FormControl><Input placeholder={field.placeholder} {...f} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* About Section */}
+          <Card>
+            <CardHeader className="pb-4"><CardTitle className="text-base">About Section</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {[
+                  { name: "aboutTitle" as const, label: "About Title", placeholder: "Our Story" },
+                  { name: "aboutImageUrl" as const, label: "About Image URL", placeholder: "https://example.com/about.jpg" },
+                ].map((field) => (
+                  <FormField key={field.name} control={form.control} name={field.name} render={({ field: f }) => (
+                    <FormItem>
+                      <FormLabel>{field.label}</FormLabel>
+                      <FormControl><Input placeholder={field.placeholder} {...f} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                ))}
+              </div>
+              <FormField control={form.control} name="aboutText" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>About Text</FormLabel>
+                  <FormControl><Textarea placeholder="Tell your story..." rows={4} {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+            </CardContent>
+          </Card>
+
+          {/* Contact Information */}
+          <Card>
+            <CardHeader className="pb-4"><CardTitle className="text-base">Contact Information</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {[
+                  { name: "address" as const, label: "Address", placeholder: "123 Main Street, City, State" },
+                  { name: "phone" as const, label: "Phone Number", placeholder: "+91 98765 43210" },
+                  { name: "email" as const, label: "Email", placeholder: "hello@restaurant.com" },
+                  { name: "openingHours" as const, label: "Opening Hours", placeholder: "Mon-Sun: 8:00 AM - 10:00 PM" },
+                ].map((field) => (
+                  <FormField key={field.name} control={form.control} name={field.name} render={({ field: f }) => (
+                    <FormItem>
+                      <FormLabel>{field.label}</FormLabel>
+                      <FormControl><Input placeholder={field.placeholder} {...f} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                ))}
+              </div>
+
+              {/* Currency Selector */}
+              <FormField control={form.control} name="currency" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Currency</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger data-testid="select-currency">
+                        <SelectValue placeholder="Select currency" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {CURRENCIES.map((c) => (
+                        <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )} />
+
+              {/* Map Embed URL */}
+              <FormField control={form.control} name="mapEmbedUrl" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Google Maps Embed URL</FormLabel>
+                  <FormControl>
+                    <Input placeholder="https://www.google.com/maps/embed?pb=..." {...field} data-testid="input-mapEmbedUrl" />
+                  </FormControl>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Get this from Google Maps → Share → Embed a map → Copy the src URL from the iframe code.
+                  </p>
+                  <FormMessage />
+                </FormItem>
+              )} />
+            </CardContent>
+          </Card>
+
+          {/* Social Media */}
+          <Card>
+            <CardHeader className="pb-4"><CardTitle className="text-base">Social Media</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {[
+                  { name: "facebookUrl" as const, label: "Facebook URL", placeholder: "https://facebook.com/..." },
+                  { name: "instagramUrl" as const, label: "Instagram URL", placeholder: "https://instagram.com/..." },
+                  { name: "twitterUrl" as const, label: "Twitter/X URL", placeholder: "https://twitter.com/..." },
+                ].map((field) => (
+                  <FormField key={field.name} control={form.control} name={field.name} render={({ field: f }) => (
+                    <FormItem>
+                      <FormLabel>{field.label}</FormLabel>
+                      <FormControl><Input placeholder={field.placeholder} {...f} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Footer */}
+          <Card>
+            <CardHeader className="pb-4"><CardTitle className="text-base">Footer</CardTitle></CardHeader>
+            <CardContent>
+              <FormField control={form.control} name="footerText" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Footer Text</FormLabel>
+                  <FormControl><Textarea placeholder="2024 Restaurant. All rights reserved." rows={3} {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+            </CardContent>
+          </Card>
+
           <div className="flex justify-end">
             <Button type="submit" disabled={updateContent.isPending} data-testid="button-save-content">
               {updateContent.isPending ? "Saving..." : "Save All Changes"}

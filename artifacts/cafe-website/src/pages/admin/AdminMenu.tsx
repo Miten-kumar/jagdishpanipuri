@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Plus, Pencil, Trash2, ChevronDown, ChevronRight, ToggleLeft, ToggleRight } from "lucide-react";
-import { useGetMenuCategories, useGetMenuItems, useCreateMenuCategory, useUpdateMenuCategory, useDeleteMenuCategory, useCreateMenuItem, useUpdateMenuItem, useDeleteMenuItem, getGetMenuCategoriesQueryKey, getGetMenuItemsQueryKey } from "@workspace/api-client-react";
+import { Plus, Pencil, Trash2, ChevronDown, ChevronRight } from "lucide-react";
+import { useGetMenuCategories, useGetMenuItems, useGetSiteContent, useCreateMenuCategory, useUpdateMenuCategory, useDeleteMenuCategory, useCreateMenuItem, useUpdateMenuItem, useDeleteMenuItem, getGetMenuCategoriesQueryKey, getGetMenuItemsQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,22 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+
+const CURRENCIES = [
+  { code: "INR", symbol: "₹", name: "Indian Rupee" },
+  { code: "USD", symbol: "$", name: "US Dollar" },
+  { code: "EUR", symbol: "€", name: "Euro" },
+  { code: "GBP", symbol: "£", name: "British Pound" },
+  { code: "AED", symbol: "د.إ", name: "UAE Dirham" },
+  { code: "SGD", symbol: "S$", name: "Singapore Dollar" },
+  { code: "AUD", symbol: "A$", name: "Australian Dollar" },
+];
+
+function getCurrencySymbol(code: string) {
+  return CURRENCIES.find((c) => c.code === code)?.symbol ?? "₹";
+}
 
 type Category = { id: number; name: string; description: string; iconName: string; sortOrder: number };
 type MenuItem = { id: number; categoryId: number; name: string; description: string; price: string; imageUrl: string; isAvailable: boolean; isFeatured: boolean; tags: string; sortOrder: number };
@@ -18,9 +33,12 @@ type MenuItem = { id: number; categoryId: number; name: string; description: str
 export default function AdminMenu() {
   const { data: categories } = useGetMenuCategories();
   const { data: menuItems } = useGetMenuItems();
+  const { data: siteContent } = useGetSiteContent();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [expandedCats, setExpandedCats] = useState<Set<number>>(new Set());
+
+  const currencySymbol = getCurrencySymbol(siteContent?.currency ?? "INR");
 
   const createCategory = useCreateMenuCategory();
   const updateCategory = useUpdateMenuCategory();
@@ -51,7 +69,7 @@ export default function AdminMenu() {
     if (!data?.name) return;
     const payload = { name: data.name, description: data.description ?? "", iconName: data.iconName ?? "🍽", sortOrder: data.sortOrder ?? 0 };
     if (data.id) {
-      updateCategory.mutate({ params: { id: data.id }, data: payload }, {
+      updateCategory.mutate({ id: data.id, data: payload }, {
         onSuccess: () => { invalidate(); setCatDialog({ open: false }); toast({ title: "Category updated" }); },
       });
     } else {
@@ -63,7 +81,7 @@ export default function AdminMenu() {
 
   const handleDeleteCategory = (id: number) => {
     if (!confirm("Delete this category and all its items?")) return;
-    deleteCategory.mutate({ params: { id } }, { onSuccess: () => { invalidate(); toast({ title: "Category deleted" }); } });
+    deleteCategory.mutate({ id }, { onSuccess: () => { invalidate(); toast({ title: "Category deleted" }); } });
   };
 
   const handleSaveItem = () => {
@@ -76,7 +94,7 @@ export default function AdminMenu() {
       isFeatured: data.isFeatured ?? false, tags: data.tags ?? "", sortOrder: data.sortOrder ?? 0,
     };
     if (data.id) {
-      updateItem.mutate({ params: { id: data.id }, data: payload }, {
+      updateItem.mutate({ id: data.id, data: payload }, {
         onSuccess: () => { invalidate(); setItemDialog({ open: false }); toast({ title: "Item updated" }); },
       });
     } else {
@@ -88,7 +106,7 @@ export default function AdminMenu() {
 
   const handleDeleteItem = (id: number) => {
     if (!confirm("Delete this menu item?")) return;
-    deleteItem.mutate({ params: { id } }, { onSuccess: () => { invalidate(); toast({ title: "Item deleted" }); } });
+    deleteItem.mutate({ id }, { onSuccess: () => { invalidate(); toast({ title: "Item deleted" }); } });
   };
 
   return (
@@ -153,7 +171,7 @@ export default function AdminMenu() {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
                               <span className="font-medium text-sm text-foreground">{item.name}</span>
-                              <span className="text-primary font-bold text-sm">${item.price}</span>
+                              <span className="text-primary font-bold text-sm">{currencySymbol}{item.price}</span>
                               {item.isFeatured && <Badge className="text-xs">Featured</Badge>}
                               {!item.isAvailable && <Badge variant="secondary" className="text-xs">Unavailable</Badge>}
                             </div>
@@ -243,9 +261,22 @@ export default function AdminMenu() {
               </div>
               <div>
                 <Label>Price</Label>
-                <Input className="mt-1" value={itemDialog.data?.price ?? ""} placeholder="12.99"
-                  onChange={(e) => setItemDialog((p) => ({ ...p, data: { ...p.data, price: e.target.value } }))}
-                  data-testid="input-item-price" />
+                <div className="mt-1 flex gap-2">
+                  <Select value={siteContent?.currency ?? "INR"} onValueChange={() => {}}>
+                    <SelectTrigger className="w-24 shrink-0">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CURRENCIES.map((c) => (
+                        <SelectItem key={c.code} value={c.code}>{c.symbol} {c.code}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Input value={itemDialog.data?.price ?? ""} placeholder="0.00" type="number" min="0" step="0.01"
+                    onChange={(e) => setItemDialog((p) => ({ ...p, data: { ...p.data, price: e.target.value } }))}
+                    data-testid="input-item-price" />
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">Change currency in Site Content settings</p>
               </div>
             </div>
             <div>
