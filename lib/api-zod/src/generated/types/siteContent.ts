@@ -26,4 +26,6 @@ export interface SiteContent {
   twitterUrl?: string;
   footerText: string;
   updatedAt: string;
+  mapEmbedUrl?: string;
+  currency: string;
 }

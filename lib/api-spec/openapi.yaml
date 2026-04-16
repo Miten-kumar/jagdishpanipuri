@@ -409,6 +409,8 @@ components:
           type: string
         mapEmbedUrl:
           type: string
+        isOrderingEnabled:
+          type: boolean
         updatedAt:
           type: string
       required:
@@ -429,6 +431,7 @@ components:
         - footerText
         - currency
         - mapEmbedUrl
+        - isOrderingEnabled
         - updatedAt
 
     UpdateSiteContentBody:
@@ -472,6 +475,8 @@ components:
           type: string
         mapEmbedUrl:
           type: string
+        isOrderingEnabled:
+          type: boolean
 
     ThemeSettings:
       type: object

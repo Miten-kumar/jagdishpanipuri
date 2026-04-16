@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { db, ordersTable, orderItemsTable } from "@workspace/db";
+import { db, ordersTable, orderItemsTable, siteContentTable } from "@workspace/db";
 import { eq, desc } from "drizzle-orm";
 import { requireAuth } from "../lib/auth";
 
@@ -26,6 +26,10 @@ router.get("/orders", requireAuth, async (req, res) => {
 });
 
 router.post("/orders", async (req, res) => {
+  const [siteContent] = await db.select().from(siteContentTable).limit(1);
+  if (siteContent && siteContent.isOrderingEnabled === false) {
+    return res.status(403).json({ error: "Ordering is currently disabled" });
+  }
   try {
     const { customerName, customerEmail, customerPhone, tableNumber, notes, items } = req.body;
     if (!customerName || !items || !Array.isArray(items) || items.length === 0) {
