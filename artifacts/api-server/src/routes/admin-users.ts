@@ -2,11 +2,11 @@ import { Router } from "express";
 import { db, adminUsersTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
-import { requireAuth } from "../lib/auth";
+import { requireSuperAdmin } from "../lib/auth";
 
 const router = Router();
 
-router.get("/admin-users", requireAuth, async (req, res) => {
+router.get("/admin-users", requireSuperAdmin, async (req, res) => {
   try {
     const users = await db.select({
       id: adminUsersTable.id,
@@ -21,7 +21,7 @@ router.get("/admin-users", requireAuth, async (req, res) => {
   }
 });
 
-router.post("/admin-users", requireAuth, async (req, res) => {
+router.post("/admin-users", requireSuperAdmin, async (req, res) => {
   try {
     const { username, password, role } = req.body;
     if (!username || !password) {
@@ -43,7 +43,7 @@ router.post("/admin-users", requireAuth, async (req, res) => {
   }
 });
 
-router.put("/admin-users/:id", requireAuth, async (req, res) => {
+router.put("/admin-users/:id", requireSuperAdmin, async (req, res) => {
   try {
     const id = Number(req.params.id);
     const { username, password, role } = req.body;
@@ -61,7 +61,7 @@ router.put("/admin-users/:id", requireAuth, async (req, res) => {
   }
 });
 
-router.delete("/admin-users/:id", requireAuth, async (req, res) => {
+router.delete("/admin-users/:id", requireSuperAdmin, async (req, res) => {
   try {
     const id = Number(req.params.id);
     await db.delete(adminUsersTable).where(eq(adminUsersTable.id, id));

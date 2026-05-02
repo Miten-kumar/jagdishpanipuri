@@ -42,6 +42,12 @@ export const siteContentTable = pgTable("site_content", {
     .notNull()
     .default("https://share.google/jKvjhyW4PVoLJMJv9"),
   isOrderingEnabled: boolean("is_ordering_enabled").notNull().default(false),
+  isOrderTrackingEnabled: boolean("is_order_tracking_enabled")
+    .notNull()
+    .default(true),
+  isPublicOrderStatusBoardEnabled: boolean("is_public_order_status_board_enabled")
+    .notNull()
+    .default(false),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 

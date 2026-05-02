@@ -12,6 +12,8 @@ import AboutPage from "@/pages/AboutPage";
 import MenuPage from "@/pages/MenuPage";
 import GalleryPage from "@/pages/GalleryPage";
 import ContactPage from "@/pages/ContactPage";
+import TrackOrderPage from "@/pages/TrackOrderPage";
+import OrderStatusBoardPage from "@/pages/OrderStatusBoardPage";
 import LoginPage from "@/pages/LoginPage";
 import AdminLayout from "@/pages/admin/AdminLayout";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
@@ -62,6 +64,18 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function SuperAdminRoute({ children }: { children: React.ReactNode }) {
+  const { user, isLoading } = useAuth();
+  const [, setLocation] = useLocation();
+  useEffect(() => {
+    if (!isLoading && (!user || user.role !== "superadmin")) setLocation("/admin");
+  }, [user, isLoading, setLocation]);
+  if (isLoading) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading...</div>;
+  if (!user) return null;
+  if (user.role !== "superadmin") return null;
+  return <>{children}</>;
+}
+
 function Router() {
   return (
     <>
@@ -73,20 +87,23 @@ function Router() {
         <Route path="/menu" component={() => <PublicLayout><MenuPage /></PublicLayout>} />
         <Route path="/gallery" component={() => <PublicLayout><GalleryPage /></PublicLayout>} />
         <Route path="/contact" component={() => <PublicLayout><ContactPage /></PublicLayout>} />
+        <Route path="/track-order" component={() => <PublicLayout><TrackOrderPage /></PublicLayout>} />
+        <Route path="/track-order/:id" component={(params) => <PublicLayout><TrackOrderPage initialOrderId={params.id} /></PublicLayout>} />
+        <Route path="/order-status" component={() => <PublicLayout><OrderStatusBoardPage /></PublicLayout>} />
 
         {/* Auth */}
         <Route path="/admin/login" component={LoginPage} />
 
         {/* Admin routes */}
         <Route path="/admin" component={() => <ProtectedRoute><AdminLayout><AdminDashboard /></AdminLayout></ProtectedRoute>} />
-        <Route path="/admin/content" component={() => <ProtectedRoute><AdminLayout><AdminContent /></AdminLayout></ProtectedRoute>} />
-        <Route path="/admin/theme" component={() => <ProtectedRoute><AdminLayout><AdminTheme /></AdminLayout></ProtectedRoute>} />
+        <Route path="/admin/content" component={() => <ProtectedRoute><SuperAdminRoute><AdminLayout><AdminContent /></AdminLayout></SuperAdminRoute></ProtectedRoute>} />
+        <Route path="/admin/theme" component={() => <ProtectedRoute><SuperAdminRoute><AdminLayout><AdminTheme /></AdminLayout></SuperAdminRoute></ProtectedRoute>} />
         <Route path="/admin/menu" component={() => <ProtectedRoute><AdminLayout><AdminMenu /></AdminLayout></ProtectedRoute>} />
         <Route path="/admin/gallery" component={() => <ProtectedRoute><AdminLayout><AdminGallery /></AdminLayout></ProtectedRoute>} />
         <Route path="/admin/inquiries" component={() => <ProtectedRoute><AdminLayout><AdminInquiries /></AdminLayout></ProtectedRoute>} />
         <Route path="/admin/orders" component={() => <ProtectedRoute><AdminLayout><AdminOrders /></AdminLayout></ProtectedRoute>} />
         <Route path="/admin/analytics" component={() => <ProtectedRoute><AdminLayout><AdminAnalytics /></AdminLayout></ProtectedRoute>} />
-        <Route path="/admin/users" component={() => <ProtectedRoute><AdminLayout><AdminUsers /></AdminLayout></ProtectedRoute>} />
+        <Route path="/admin/users" component={() => <ProtectedRoute><SuperAdminRoute><AdminLayout><AdminUsers /></AdminLayout></SuperAdminRoute></ProtectedRoute>} />
         <Route path="/admin/branches" component={() => <ProtectedRoute><AdminLayout><AdminBranches /></AdminLayout></ProtectedRoute>} />
 
         <Route component={NotFound} />

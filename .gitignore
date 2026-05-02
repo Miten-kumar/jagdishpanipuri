@@ -7,6 +7,7 @@ out-tsc
 *.tsbuildinfo
 .expo
 .expo-shared
+*.env
 
 # dependencies
 node_modules
@@ -37,6 +38,9 @@ yarn-error.log
 testem.log
 /typings
 
+# Codex CLI
+.codex
+
 # System Files
 .DS_Store
 Thumbs.db
@@ -47,3 +51,6 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+
+# Local tool configs
+.config/

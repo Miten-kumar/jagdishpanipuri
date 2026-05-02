@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { themeSettingsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
+import { requireSuperAdmin } from "../lib/auth";
 
 const router = Router();
 
@@ -19,7 +20,7 @@ router.get("/theme", async (req, res) => {
   }
 });
 
-router.put("/theme", async (req, res) => {
+router.put("/theme", requireSuperAdmin, async (req, res) => {
   try {
     const rows = await db.select().from(themeSettingsTable).limit(1);
     if (rows.length === 0) {

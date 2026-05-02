@@ -26,6 +26,10 @@ if (!basePath) {
   );
 }
 
+const apiOrigin =
+  process.env.API_ORIGIN ??
+  `http://localhost:${process.env.API_PORT ?? "3001"}`;
+
 export default defineConfig({
   base: basePath,
   plugins: [
@@ -62,6 +66,15 @@ export default defineConfig({
     port,
     host: "0.0.0.0",
     allowedHosts: true,
+    proxy:
+      process.env.REPL_ID === undefined
+        ? {
+            "/api": {
+              target: apiOrigin,
+              changeOrigin: true,
+            },
+          }
+        : undefined,
     fs: {
       strict: true,
       deny: ["**/.*"],

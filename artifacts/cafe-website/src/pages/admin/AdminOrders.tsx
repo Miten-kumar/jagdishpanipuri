@@ -8,7 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { useGetSiteContent } from "@workspace/api-client-react";
+import { Switch } from "@/components/ui/switch";
+import { getGetSiteContentQueryKey, useGetSiteContent } from "@workspace/api-client-react";
 import { useAuth } from "@/context/AuthContext";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -165,6 +166,37 @@ export default function AdminOrders() {
   const [billOrder, setBillOrder] = useState<Order | null>(null);
   const [filter, setFilter] = useState("all");
 
+  const orderTrackingEnabled =
+    (siteContent as unknown as { isOrderTrackingEnabled?: boolean })
+      ?.isOrderTrackingEnabled ?? true;
+  const orderBoardEnabled =
+    (siteContent as unknown as { isPublicOrderStatusBoardEnabled?: boolean })
+      ?.isPublicOrderStatusBoardEnabled ?? false;
+
+  const publicPagesMutation = useMutation({
+    mutationFn: async (updates: {
+      isOrderTrackingEnabled?: boolean;
+      isPublicOrderStatusBoardEnabled?: boolean;
+    }) => {
+      const res = await fetch(`${BASE}/api/site-content/public-pages`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(updates),
+      });
+      if (!res.ok) throw new Error("Failed");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: getGetSiteContentQueryKey() });
+      toast({ title: "Updated settings" });
+    },
+    onError: () =>
+      toast({ title: "Failed to update settings", variant: "destructive" }),
+  });
+
   const { data: orders, isLoading } = useQuery<Order[]>({
     queryKey: ["orders"],
     queryFn: async () => {
@@ -202,6 +234,48 @@ export default function AdminOrders() {
           onSaved={() => { queryClient.invalidateQueries({ queryKey: ["orders"] }); setEditOrder(undefined); }}
         />
       )}
+
+      <Card className="mb-6">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-base">Public Order Pages</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between rounded-lg border p-4">
+            <div>
+              <p className="font-medium text-foreground">Enable Order Tracking</p>
+              <p className="text-sm text-muted-foreground">
+                Customers can track an order by ID.
+              </p>
+            </div>
+            <Switch
+              checked={orderTrackingEnabled}
+              onCheckedChange={(v) =>
+                publicPagesMutation.mutate({ isOrderTrackingEnabled: v })
+              }
+              disabled={!token || publicPagesMutation.isPending}
+            />
+          </div>
+
+          <div className="flex items-center justify-between rounded-lg border p-4">
+            <div>
+              <p className="font-medium text-foreground">Enable Live Order Board</p>
+              <p className="text-sm text-muted-foreground">
+                Public page that lists all “preparing” and “ready” orders (no prices).
+              </p>
+            </div>
+            <Switch
+              checked={orderBoardEnabled}
+              onCheckedChange={(v) =>
+                publicPagesMutation.mutate({
+                  isPublicOrderStatusBoardEnabled: v,
+                })
+              }
+              disabled={!token || publicPagesMutation.isPending}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Customer Orders</h1>

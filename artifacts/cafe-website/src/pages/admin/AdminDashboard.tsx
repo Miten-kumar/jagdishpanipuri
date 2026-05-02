@@ -5,8 +5,10 @@ import { useGetMenuItems, useGetGalleryImages, useGetInquiries, useGetMenuCatego
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/context/AuthContext";
 
 export default function AdminDashboard() {
+  const { user } = useAuth();
   const { data: menuItems } = useGetMenuItems();
   const { data: galleryImages } = useGetGalleryImages();
   const { data: inquiries } = useGetInquiries();
@@ -22,8 +24,12 @@ export default function AdminDashboard() {
   ];
 
   const quickActions = [
-    { label: "Edit Site Content", desc: "Update text, images, contact info", href: "/admin/content", icon: FileText },
-    { label: "Change Theme Color", desc: "Customize the site's color palette", href: "/admin/theme", icon: Palette },
+    ...(user?.role === "superadmin"
+      ? [
+          { label: "Edit Site Content", desc: "Update text, images, contact info", href: "/admin/content", icon: FileText },
+          { label: "Change Theme Color", desc: "Customize the site's color palette", href: "/admin/theme", icon: Palette },
+        ]
+      : []),
     { label: "Manage Menu", desc: "Add, edit, delete menu items", href: "/admin/menu", icon: UtensilsCrossed },
     { label: "Manage Gallery", desc: "Upload and organize gallery photos", href: "/admin/gallery", icon: Image },
   ];

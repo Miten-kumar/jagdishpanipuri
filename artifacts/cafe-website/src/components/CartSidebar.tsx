@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "wouter";
 import {
   X,
   Plus,
@@ -57,6 +58,12 @@ export default function CartSidebar() {
 
   const currencySymbol =
     CURRENCY_SYMBOLS[siteContent?.currency ?? "INR"] ?? "₹";
+  const orderTrackingEnabled =
+    (siteContent as unknown as { isOrderTrackingEnabled?: boolean })
+      ?.isOrderTrackingEnabled ?? true;
+  const orderBoardEnabled =
+    (siteContent as unknown as { isPublicOrderStatusBoardEnabled?: boolean })
+      ?.isPublicOrderStatusBoardEnabled ?? false;
 
   const validatePhone = (phone: string): string | undefined => {
     if (!phone || phone === "+91") return undefined;
@@ -180,9 +187,23 @@ export default function CartSidebar() {
                 <p className="text-muted-foreground mb-6">
                   We'll prepare your items shortly. Thank you!
                 </p>
-                <Button onClick={handleClose} className="w-full">
-                  Continue Browsing
-                </Button>
+                <div className="w-full flex flex-col gap-2">
+                  {orderId !== null && orderTrackingEnabled && (
+                    <Button asChild className="w-full">
+                      <Link href={`/track-order/${orderId}`}>
+                        Track Order Status
+                      </Link>
+                    </Button>
+                  )}
+                  {orderBoardEnabled && (
+                    <Button asChild variant="secondary" className="w-full">
+                      <Link href="/order-status">View Live Order Board</Link>
+                    </Button>
+                  )}
+                  <Button onClick={handleClose} variant="outline" className="w-full">
+                    Continue Browsing
+                  </Button>
+                </div>
               </div>
             ) : step === "checkout" ? (
               <form

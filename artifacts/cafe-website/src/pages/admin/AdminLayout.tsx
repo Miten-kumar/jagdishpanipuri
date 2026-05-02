@@ -19,18 +19,21 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 
-const navItems = [
+const baseNavItems = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { label: "Customer Orders", href: "/admin/orders", icon: ShoppingBag },
-  { label: "Site Content", href: "/admin/content", icon: FileText },
   { label: "Branch Locations", href: "/admin/branches", icon: MapPin },
-  { label: "Theme Color", href: "/admin/theme", icon: Palette },
   { label: "Menu Manager", href: "/admin/menu", icon: UtensilsCrossed },
   { label: "Gallery", href: "/admin/gallery", icon: Image },
   { label: "Inquiries", href: "/admin/inquiries", icon: MessageSquare },
   { label: "Analytics", href: "/admin/analytics", icon: BarChart2 },
+] as const;
+
+const superAdminNavItems = [
+  { label: "Site Content", href: "/admin/content", icon: FileText },
+  { label: "Theme Color", href: "/admin/theme", icon: Palette },
   { label: "Manage Users", href: "/admin/users", icon: Users },
-];
+] as const;
 
 export default function AdminLayout({
   children,
@@ -40,6 +43,10 @@ export default function AdminLayout({
   const [location] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { logout, user } = useAuth();
+  const navItems =
+    user?.role === "superadmin"
+      ? [...baseNavItems, ...superAdminNavItems]
+      : baseNavItems;
 
   return (
     <div className="min-h-screen bg-muted/20 flex">
