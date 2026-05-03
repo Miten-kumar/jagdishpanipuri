@@ -15,6 +15,7 @@ if (Number.isNaN(port) || port <= 0) {
 const basePath = process.env.BASE_PATH ?? "/";
 
 const apiOrigin =
+  process.env.VITE_API_ORIGIN ??
   process.env.API_ORIGIN ??
   `http://localhost:${process.env.API_PORT ?? "3001"}`;
 
