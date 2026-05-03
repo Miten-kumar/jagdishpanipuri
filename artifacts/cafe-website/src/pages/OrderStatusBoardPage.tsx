@@ -2,8 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useGetSiteContent } from "@workspace/api-client-react";
-
-const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+import { apiPath } from "@/lib/api-base";
 
 type BoardRow = { id: number; status: string; updatedAt: string };
 
@@ -33,7 +32,7 @@ export default function OrderStatusBoardPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${BASE}/api/orders/public-status`);
+      const res = await fetch(apiPath("/api/orders/public-status"));
       if (res.status === 404) {
         setRows([]);
         setError("This page is currently disabled.");
@@ -57,7 +56,7 @@ export default function OrderStatusBoardPage() {
     setConnected(false);
     void fetchBoard();
 
-    const stream = new EventSource(`${BASE}/api/orders/public-status/stream`);
+    const stream = new EventSource(apiPath("/api/orders/public-status/stream"));
 
     const handleConnected = () => {
       setConnected(true);

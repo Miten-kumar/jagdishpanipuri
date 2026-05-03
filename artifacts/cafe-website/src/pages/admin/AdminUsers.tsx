@@ -9,8 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-
-const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+import { apiPath } from "@/lib/api-base";
 
 interface AdminUser { id: number; username: string; role: string; createdAt: string; }
 
@@ -25,7 +24,7 @@ function UserFormModal({ user, onClose, onSaved }: { user?: AdminUser | null; on
     if (!form.username || (!user && !form.password)) { toast({ title: "Username and password are required", variant: "destructive" }); return; }
     setSaving(true);
     try {
-      const url = user ? `${BASE}/api/admin-users/${user.id}` : `${BASE}/api/admin-users`;
+      const url = user ? apiPath(`/api/admin-users/${user.id}`) : apiPath("/api/admin-users");
       const body: Record<string, string> = { username: form.username, role: form.role };
       if (form.password) body.password = form.password;
       const res = await fetch(url, { method: user ? "PUT" : "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify(body) });
@@ -73,7 +72,7 @@ export default function AdminUsers() {
   const { data: users, isLoading } = useQuery<AdminUser[]>({
     queryKey: ["admin-users"],
     queryFn: async () => {
-      const res = await fetch(`${BASE}/api/admin-users`, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch(apiPath("/api/admin-users"), { headers: { Authorization: `Bearer ${token}` } });
       if (!res.ok) throw new Error("Failed");
       return res.json();
     },
@@ -81,7 +80,7 @@ export default function AdminUsers() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: number) => { await fetch(`${BASE}/api/admin-users/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } }); },
+    mutationFn: async (id: number) => { await fetch(apiPath(`/api/admin-users/${id}`), { method: "DELETE", headers: { Authorization: `Bearer ${token}` } }); },
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["admin-users"] }); toast({ title: "User deleted" }); },
     onError: () => toast({ title: "Failed to delete user", variant: "destructive" }),
   });

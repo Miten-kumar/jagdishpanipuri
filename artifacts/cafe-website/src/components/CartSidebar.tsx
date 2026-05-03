@@ -16,8 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
-
-const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+import { apiPath } from "@/lib/api-base";
 
 const CURRENCY_SYMBOLS: Record<string, string> = {
   INR: "₹",
@@ -89,7 +88,7 @@ export default function CartSidebar() {
 
     setSubmitting(true);
     try {
-      const res = await fetch(`${BASE}/api/orders`, {
+      const res = await fetch(apiPath("/api/orders"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

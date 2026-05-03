@@ -12,8 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { getGetSiteContentQueryKey, useGetSiteContent } from "@workspace/api-client-react";
 import { useAuth } from "@/context/AuthContext";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-
-const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+import { apiPath } from "@/lib/api-base";
 
 interface OrderItem { id?: number; menuItemId: number; name: string; price: number | string; quantity: number; notes?: string; }
 interface Order { id: number; customerName: string; customerEmail: string; customerPhone: string; tableNumber: string; status: string; notes: string; total: string; createdAt: string; items: OrderItem[]; }
@@ -101,7 +100,7 @@ function OrderFormModal({ order, onClose, onSaved }: { order?: Order | null; onC
     const validItems = items.filter((i) => i.name && i.price);
     if (!form.customerName || validItems.length === 0) { toast({ title: "Customer name and at least one item required", variant: "destructive" }); setSaving(false); return; }
     try {
-      const url = order ? `${BASE}/api/orders/${order.id}` : `${BASE}/api/orders`;
+      const url = order ? apiPath(`/api/orders/${order.id}`) : apiPath("/api/orders");
       const method = order ? "PUT" : "POST";
       const res = await fetch(url, { method, headers: { "Content-Type": "application/json", ...(order ? { Authorization: `Bearer ${token}` } : {}) }, body: JSON.stringify({ ...form, items: validItems.map((i) => ({ menuItemId: 0, name: i.name, price: parseFloat(i.price), quantity: i.quantity, notes: "" })) }) });
       if (!res.ok) throw new Error("Failed");
@@ -178,7 +177,7 @@ export default function AdminOrders() {
       isOrderTrackingEnabled?: boolean;
       isPublicOrderStatusBoardEnabled?: boolean;
     }) => {
-      const res = await fetch(`${BASE}/api/site-content/public-pages`, {
+      const res = await fetch(apiPath("/api/site-content/public-pages"), {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -200,7 +199,7 @@ export default function AdminOrders() {
   const { data: orders, isLoading } = useQuery<Order[]>({
     queryKey: ["orders"],
     queryFn: async () => {
-      const res = await fetch(`${BASE}/api/orders`, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch(apiPath("/api/orders"), { headers: { Authorization: `Bearer ${token}` } });
       if (!res.ok) throw new Error("Failed");
       return res.json();
     },
@@ -209,7 +208,7 @@ export default function AdminOrders() {
 
   const acceptMutation = useMutation({
     mutationFn: async (id: number) => {
-      const res = await fetch(`${BASE}/api/orders/${id}/accept`, { method: "PATCH", headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch(apiPath(`/api/orders/${id}/accept`), { method: "PATCH", headers: { Authorization: `Bearer ${token}` } });
       if (!res.ok) throw new Error("Failed");
       return res.json();
     },
@@ -218,7 +217,7 @@ export default function AdminOrders() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: number) => { await fetch(`${BASE}/api/orders/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } }); },
+    mutationFn: async (id: number) => { await fetch(apiPath(`/api/orders/${id}`), { method: "DELETE", headers: { Authorization: `Bearer ${token}` } }); },
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["orders"] }); toast({ title: "Order deleted" }); },
   });
 

@@ -28,12 +28,11 @@ import AdminUsers from "@/pages/admin/AdminUsers";
 import AdminBranches from "@/pages/admin/AdminBranches";
 import NotFound from "@/pages/not-found";
 import { useEffect } from "react";
+import { APP_BASE, apiPath } from "@/lib/api-base";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 30_000 } },
 });
-
-const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -50,7 +49,7 @@ function PageTracker() {
   useEffect(() => {
     let deviceId = localStorage.getItem("device_id");
     if (!deviceId) { deviceId = Math.random().toString(36).slice(2) + Date.now().toString(36); localStorage.setItem("device_id", deviceId); }
-    fetch(`${BASE}/api/track`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ path: location, deviceId }) }).catch(() => {});
+    fetch(apiPath("/api/track"), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ path: location, deviceId }) }).catch(() => {});
   }, [location]);
   return null;
 }
@@ -119,7 +118,7 @@ function App() {
         <AuthProvider>
           <ThemeProvider>
             <CartProvider>
-              <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+              <WouterRouter base={APP_BASE}>
                 <Router />
               </WouterRouter>
             </CartProvider>

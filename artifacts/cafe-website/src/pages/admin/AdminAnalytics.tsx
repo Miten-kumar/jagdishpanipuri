@@ -3,8 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 import { TrendingUp, MessageSquare, ShoppingBag, Monitor } from "lucide-react";
-
-const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+import { apiPath } from "@/lib/api-base";
 
 const COLORS = ["#f59e0b", "#ef4444", "#3b82f6", "#10b981", "#8b5cf6", "#f97316", "#06b6d4", "#84cc16"];
 
@@ -37,7 +36,7 @@ export default function AdminAnalytics() {
   const { data, isLoading } = useQuery<Analytics>({
     queryKey: ["analytics"],
     queryFn: async () => {
-      const res = await fetch(`${BASE}/api/analytics`, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch(apiPath("/api/analytics"), { headers: { Authorization: `Bearer ${token}` } });
       if (!res.ok) throw new Error("Failed");
       return res.json();
     },

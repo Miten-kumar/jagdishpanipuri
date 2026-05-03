@@ -12,8 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
-
-const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+import { apiPath } from "@/lib/api-base";
 interface Branch { id: number; name: string; address: string; phone: string; email: string; openingHours: string; mapUrl: string; }
 
 const phoneRegex = /^(\+91[\s-]?)?[6-9]\d{9}$/;
@@ -36,7 +35,7 @@ export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
   const { toast } = useToast();
   const createInquiry = useCreateInquiry();
-  const { data: branches } = useQuery<Branch[]>({ queryKey: ["branches"], queryFn: async () => { const r = await fetch(`${BASE}/api/branches`); return r.json(); } });
+  const { data: branches } = useQuery<Branch[]>({ queryKey: ["branches"], queryFn: async () => { const r = await fetch(apiPath("/api/branches")); return r.json(); } });
 
   const form = useForm<InquiryForm>({
     resolver: zodResolver(inquirySchema),

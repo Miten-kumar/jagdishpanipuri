@@ -9,8 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-
-const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+import { apiPath } from "@/lib/api-base";
 
 interface Branch { id: number; name: string; address: string; phone: string; email: string; openingHours: string; mapUrl: string; sortOrder: number; }
 
@@ -26,7 +25,7 @@ function BranchFormModal({ branch, onClose, onSaved }: { branch?: Branch | null;
     if (!form.name) { toast({ title: "Branch name is required", variant: "destructive" }); return; }
     setSaving(true);
     try {
-      const url = branch ? `${BASE}/api/branches/${branch.id}` : `${BASE}/api/branches`;
+      const url = branch ? apiPath(`/api/branches/${branch.id}`) : apiPath("/api/branches");
       const res = await fetch(url, { method: branch ? "PUT" : "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify(form) });
       if (!res.ok) throw new Error("Failed");
       toast({ title: branch ? "Branch updated" : "Branch added" });
@@ -71,14 +70,14 @@ export default function AdminBranches() {
   const { data: branches, isLoading } = useQuery<Branch[]>({
     queryKey: ["branches"],
     queryFn: async () => {
-      const res = await fetch(`${BASE}/api/branches`);
+      const res = await fetch(apiPath("/api/branches"));
       if (!res.ok) throw new Error("Failed");
       return res.json();
     },
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: number) => { await fetch(`${BASE}/api/branches/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } }); },
+    mutationFn: async (id: number) => { await fetch(apiPath(`/api/branches/${id}`), { method: "DELETE", headers: { Authorization: `Bearer ${token}` } }); },
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["branches"] }); toast({ title: "Branch deleted" }); },
     onError: () => toast({ title: "Failed to delete branch", variant: "destructive" }),
   });

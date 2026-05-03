@@ -6,8 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useGetSiteContent } from "@workspace/api-client-react";
-
-const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+import { apiPath } from "@/lib/api-base";
 
 type PublicOrderStatus = "pending" | "accepted" | "preparing" | "ready" | string;
 
@@ -73,7 +72,7 @@ export default function TrackOrderPage({ initialOrderId }: { initialOrderId?: st
     setError(null);
     setOrder(null);
     try {
-      const res = await fetch(`${BASE}/api/orders/${id}/track`);
+      const res = await fetch(apiPath(`/api/orders/${id}/track`));
       if (res.status === 404) {
         setError("Order not found (or it may have been cancelled).");
         return;

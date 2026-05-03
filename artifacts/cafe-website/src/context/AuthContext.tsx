@@ -1,7 +1,6 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
 import { setAuthTokenGetter } from "@workspace/api-client-react";
-
-const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+import { apiPath } from "@/lib/api-base";
 
 interface AuthUser {
   id: number;
@@ -33,7 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const stored = localStorage.getItem("admin_token");
     if (stored) {
       setToken(stored);
-      fetch(`${BASE}/api/auth/me`, { headers: { Authorization: `Bearer ${stored}` } })
+      fetch(apiPath("/api/auth/me"), { headers: { Authorization: `Bearer ${stored}` } })
         .then((r) => (r.ok ? r.json() : null))
         .then((data) => { if (data) setUser(data); else { localStorage.removeItem("admin_token"); setToken(null); } })
         .catch(() => { localStorage.removeItem("admin_token"); setToken(null); })
@@ -44,7 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (username: string, password: string) => {
-    const res = await fetch(`${BASE}/api/auth/login`, {
+    const res = await fetch(apiPath("/api/auth/login"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
